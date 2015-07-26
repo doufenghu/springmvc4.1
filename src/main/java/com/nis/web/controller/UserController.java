@@ -18,10 +18,9 @@ public class UserController extends BaseController{
 	
 	@RequestMapping("/list")
 	public String userList(){
-		CustomerContextHolder.setCustomerType(CustomerContextHolder.DATA_SOURCE_B);
 		SysUser user = userService.getUserByIdWithDepartment(1l);
 		System.out.println(user.getUserDeptList().size());
-		CustomerContextHolder.clearCustomerType();
+		
 		return "success";
 	}
 	

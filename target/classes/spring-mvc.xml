@@ -36,6 +36,8 @@
   	<!-- 默认注解映射支持  -->
   	<mvc:annotation-driven/>
   	
+  
+  	
   	<!--事务控制驱动注解,发现注解@Transactional 时，找transactionManager事务管理器  -->
   	<tx:annotation-driven transaction-manager="transactionManager"/>
   	
@@ -43,6 +45,14 @@
   	<!-- autodetection of such annotated controllers -->
 	<context:component-scan base-package="com.nis.web"></context:component-scan>
 	
+	
+	<mvc:interceptors>
+		<!-- 数据源拦截器，该拦截路径下使用数据源B -->
+  		<mvc:interceptor>
+  			<mvc:mapping path="/user/*"/>
+  			<bean class="com.nis.interceptor.DataSourceBInterceptor"></bean>
+  		</mvc:interceptor>
+  	</mvc:interceptors>
 	
 	<!-- 视图文件解析 -->
 	<bean id="internalResourceViewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
