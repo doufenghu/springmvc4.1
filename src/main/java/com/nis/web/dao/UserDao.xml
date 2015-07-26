@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nis.web.dao.UserDao">
+	
+	<cache eviction="LRU" flushInterval="60000" size="512" readOnly="true">
+	</cache>
+	<!-- 通过别名映射对象 -->
+	<select id="getUserById" parameterType="long" resultType="sysUser">
+		select 
+			id as "id",
+			login_id as "loginId",
+			email email,
+			create_time createTime,
+			status status
+		from sys_user where id=#{id}
+	</select>
+	
+	<select id="getUserByLoginName"  resultMap="userResultMap">
+		select 
+			id,
+			login_id,
+			email,
+			create_time,
+			status
+		from sys_user where login_id=#{loginName}
+	</select>
+	
+	<!-- map 转为对象 -->
+	<resultMap type="sysUser" id="userResultMap">
+		<id property="id" column="id"/>
+		<result property="loginId" column="login_id"/>
+		<result property="email" column="email"/>
+		<result property="createTime" column="create_time"/>
+		<result property="status" column="status"/>
+	</resultMap>
+	
+	<resultMap type="sysUser" id="userWithDepartMentResultMap">
+		<id property="id" column="user_id"/>
+		<result property="loginId" column="login_id"/>
+		<result property="email" column="email"/>
+		<result property="createTime" column="user_create_time"/>
+		<result property="status" column="user_status"/>
+		<collection property="userDeptList" ofType="sysDepartment">
+			<id property="id" column="depart_id"/>
+			<result property="deptNo" column="dept_no"/>
+			<result property="deptName" column="dept_name"/>
+			<result property="deptNameEn" column="dept_name_en"/>
+			<result property="deptNameShort" column="dept_name_short"/>
+			<result property="parentId" column="parent_id"/>
+			<result property="isLeaf" column="is_leaf"/>
+			<result property="orderNumber" column="order_number"/>
+			<result property="createTime" column="depart_create_time"/>
+			<result property="status" column="dept_status"/>
+		</collection>
+		
+	</resultMap>
+	
+	<select id="getUserByIdWithDepartment" resultMap="userWithDepartMentResultMap">
+		select u.id as user_id,u.login_id,u.email,u.create_time as user_create_time,u.status as user_status,
+			d.id as depart_id,d.dept_no,d.dept_name,d.dept_name_en,
+			d.dept_name_short,d.parent_id,d.is_leaf,d.order_number,d.create_time as depart_create_time ,d.status as dept_status
+			from sys_user u,sys_department d,sys_inter_user_department i 
+			where u.id=i.user_id and d.id=i.dept_id and u.id=#{userId} order by d.parent_id,d.order_number
+	</select>
+	
+	<insert id="insertUser" parameterType="sysUser">
+		insert into sys_user(login_id,EMAIL,PASSWORD,CREATE_TIME,STATUS)
+			values(#{loginId},#{email},#{password},#{createTime},#{status})
+	</insert>
+	
+	
+
+</mapper>
+

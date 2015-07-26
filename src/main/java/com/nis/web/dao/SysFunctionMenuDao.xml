@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nis.web.dao.SysFunctionMenuDao">
+	
+	<cache eviction="LRU" flushInterval="60000" size="512" readOnly="true">
+	</cache>
+	<resultMap type="sysFunctionMenu" id="SysFunctionMenuMap">
+		<id property="id" column="ID"/>
+		<result property="menuName"  column="MENU_NAME"/>
+		<result property="parent.id" column="PARENT_ID"/>
+		<result property="menuUrl" column="menu_url"/>
+		<result property="menuClass" column="menu_class"/>
+		<result property="menuIcon" column="menu_icon"/>
+		<result property="isLeaf" column="is_leaf"/>
+		<result property="menuOrder" column="menu_order"/>
+		<result property="menuLevel" column="menu_level"/>
+		<result property="isVisible" column="is_visible"/>
+		<result property="quickAction" column="quick_action"/>
+	</resultMap>
+	
+	<select id="getSysFunctionMenuByUserId" resultMap="SysFunctionMenuMap">
+		SELECT m2.* FROM sys_function_menu m1,sys_function_menu m2 
+			WHERE m1.id=m2.parent_id AND  m2.is_visible=1 AND  m2.id IN 
+				(SELECT p.privilege_access_value  
+					FROM sys_privilege p WHERE p.privilege_master='ROLE' AND p.privilege_access='1000' 
+						AND p.privilege_master_value IN 
+							( SELECT distinct(r.id) FROM sys_role r,sys_inter_user_role ur WHERE r.id = ur.role_id AND ur.user_id=#{userId} ) 
+				 ) 
+			ORDER BY m2.menu_level,m2.menu_order
+		
+	</select>
+	
+
+</mapper>
+
