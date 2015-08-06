@@ -14,7 +14,7 @@
 				for(var i=0;i<data.length;i++){
 					menuName+=data[i].menuName+"_";
 				}
-				alert(menuName);
+				
 			});
 		});
 	});
