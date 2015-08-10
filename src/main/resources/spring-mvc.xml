@@ -29,13 +29,14 @@
   	
   	<!-- 静态资源访问，交由default Servlet handler -->
   	<mvc:default-servlet-handler/>
+  	<!-- 静态资源映射 -->
+    <mvc:resources mapping="/static/**" location="/static/" cache-period="31536000"/>
   	
   	<!-- 启用spring mvc注解 -->
   	<context:annotation-config/>
   	
   	<!-- 默认注解映射支持  -->
   	<mvc:annotation-driven/>
-  	
   
   	
   	<!--事务控制驱动注解,发现注解@Transactional 时，找transactionManager事务管理器  -->
