@@ -41,7 +41,7 @@ public class CaptchaProducerController {
         String capText = captchaProducer.createText();
         
         // store the text in the session
-        request.getSession().setAttribute(Constants.KAPTCHA_SESSION_KEY, capText);
+        request.getSession().setAttribute(Constants.KAPTCHA_SESSION_KEY, capText.toUpperCase());
 
         // create the image with the text
         BufferedImage bi = captchaProducer.createImage(capText);

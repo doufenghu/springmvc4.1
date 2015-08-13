@@ -19,6 +19,7 @@
 		select 
 			id,
 			login_id,
+			name,
 			email,
 			create_time,
 			status
@@ -29,14 +30,17 @@
 	<resultMap type="sysUser" id="userResultMap">
 		<id property="id" column="id"/>
 		<result property="loginId" column="login_id"/>
+		<result property="name" column="name"/>
 		<result property="email" column="email"/>
 		<result property="createTime" column="create_time"/>
 		<result property="status" column="status"/>
 	</resultMap>
 	
-	<resultMap type="sysUser" id="userWithDepartMentResultMap">
+	<resultMap type="sysUser" id="userWithRelationResultMap">
 		<id property="id" column="user_id"/>
 		<result property="loginId" column="login_id"/>
+		<result property="name" column="user_name"/>
+		<result property="password" column="password"/>
 		<result property="email" column="email"/>
 		<result property="createTime" column="user_create_time"/>
 		<result property="status" column="user_status"/>
@@ -53,14 +57,58 @@
 			<result property="status" column="dept_status"/>
 		</collection>
 		
+		<collection property="userRoleList" ofType="sysRole">
+			<id property="id" column="role_id"/>
+			<result property="name" column="role_name"/>
+			<result property="desc" column="role_desc"/>
+			<result property="status" column="role_status"/>
+			<result property="createTime" column="role_create_time"/>
+		</collection>
+		
+		
 	</resultMap>
 	
-	<select id="getUserByIdWithDepartment" resultMap="userWithDepartMentResultMap">
-		select u.id as user_id,u.login_id,u.email,u.create_time as user_create_time,u.status as user_status,
-			d.id as depart_id,d.dept_no,d.dept_name,d.dept_name_en,
-			d.dept_name_short,d.parent_id,d.is_leaf,d.order_number,d.create_time as depart_create_time ,d.status as dept_status
-			from sys_user u,sys_department d,sys_inter_user_department i 
-			where u.id=i.user_id and d.id=i.dept_id and u.id=#{userId} order by d.parent_id,d.order_number
+	<select id="getUserWithRelation" resultMap="userWithRelationResultMap">
+			
+		SELECT 
+			u.id AS user_id,
+			u.login_id,
+			u.name AS user_name,
+			u.password,
+			u.email,
+			u.create_time AS user_create_time,
+			u.status AS user_status,
+			d.id AS depart_id,
+			d.dept_no,
+			d.dept_name,
+			d.dept_name_en,
+			d.dept_name_short,
+			d.parent_id,
+			d.is_leaf,
+			d.order_number,
+			d.create_time AS depart_create_time ,
+			d.status AS dept_status,
+			r.id AS role_id,
+			r.name AS role_name,
+			r.desc AS role_desc,
+			r.status AS role_status,
+			r.create_time AS role_create_time
+			FROM sys_user u,sys_department d,sys_inter_user_department id,sys_role r,sys_inter_user_role ir 
+			WHERE u.id=id.user_id AND d.id=id.dept_id AND u.id=ir.user_id AND r.id=ir.role_id AND u.status=1 
+			AND r.status=1
+			
+			<if test=" user != null and user.id != null">
+				AND u.id=#{user.id}
+			</if>
+			
+			<if test=" user != null and user.loginId != null">
+				AND u.login_id=#{user.loginId} 
+			</if>
+			
+			
+			
+			
+		
 	</select>
 	
 	<insert id="insertUser" parameterType="sysUser">

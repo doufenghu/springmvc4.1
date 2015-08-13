@@ -23,6 +23,7 @@
 			<property name="locations">
 				<list>
 					<value>classpath:jdbc.properties</value>
+					<value>classpath:nis.properties</value>
 				</list>
 			</property>
 		</bean>

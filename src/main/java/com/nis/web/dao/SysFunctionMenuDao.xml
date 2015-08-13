@@ -1,28 +1,46 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.nis.web.dao.SysFunctionMenuDao">
-	
-	<cache eviction="LRU" flushInterval="60000" size="512" readOnly="true">
-	</cache>
-	<resultMap type="sysFunctionMenu" id="SysFunctionMenuMap">
-		<id property="id" column="ID"/>
-		<result property="menuName"  column="MENU_NAME"/>
-		<result property="parent.id" column="PARENT_ID"/>
-		<result property="menuUrl" column="menu_url"/>
-		<result property="menuClass" column="menu_class"/>
-		<result property="menuIcon" column="menu_icon"/>
-		<result property="isLeaf" column="is_leaf"/>
-		<result property="menuOrder" column="menu_order"/>
-		<result property="menuLevel" column="menu_level"/>
-		<result property="isVisible" column="is_visible"/>
-		<result property="quickAction" column="quick_action"/>
-	</resultMap>
-	
-	<select id="getSysFunctionMenuByUserId" resultMap="SysFunctionMenuMap">
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.nis.web.dao.SysFunctionMenuDao" >
+ 
+ <cache eviction="LRU" flushInterval="60000" size="512" readOnly="true">
+ </cache>
+ 
+ 
+ 
+  <resultMap id="MenuResultMap" type="sysFunctionMenu" >
+    <id column="ID" property="id" jdbcType="INTEGER" />
+    <result column="MENU_NAME" property="menuName" jdbcType="VARCHAR" />
+    <result column="PARENT_ID" property="parent.id" jdbcType="INTEGER" />
+    <result column="MENU_URL" property="menuUrl" jdbcType="VARCHAR" />
+    <result column="MENU_CLASS" property="menuClass" jdbcType="VARCHAR" />
+    <result column="MENU_ICON" property="menuIcon" jdbcType="VARCHAR" />
+    <result column="IS_LEAF" property="isLeaf" jdbcType="INTEGER" />
+    <result column="MENU_ORDER" property="menuOrder" jdbcType="INTEGER" />
+    <result column="MENU_LEVEL" property="menuLevel" jdbcType="INTEGER" />
+    <result column="PERMISSION" property="permission" jdbcType="VARCHAR" />
+    <result column="IS_VISIBLE" property="isVisible" jdbcType="INTEGER" />
+    <result column="QUICK_ACTION" property="quickAction" jdbcType="INTEGER" />
+  </resultMap>
+  
+   <resultMap id="ButtonResultMap" type="sysFunctionButton" >
+    <id column="ID" property="id" jdbcType="INTEGER" />
+    <result column="BTN_NAME" property="btnName" jdbcType="VARCHAR" />
+    <result column="BTN_CLASS" property="btnClass" jdbcType="VARCHAR" />
+    <result column="BTN_ICON" property="btnIcon" jdbcType="VARCHAR" />
+    <result column="BTN_SCRIPT" property="btnScript" jdbcType="VARCHAR" />
+    <result column="STATUS" property="status" jdbcType="INTEGER" />
+    <result column="MENU_ID" property="menuId" jdbcType="INTEGER" />
+  </resultMap>
+  
+  
+  
+  
+  
+	<select id="getSysFunctionMenuByUserId" resultMap="MenuResultMap">
 		SELECT m2.* FROM sys_function_menu m1,sys_function_menu m2 
 			WHERE m1.id=m2.parent_id AND  m2.is_visible=1 AND  m2.id IN 
 				(SELECT p.privilege_access_value  
-					FROM sys_privilege p WHERE p.privilege_master='ROLE' AND p.privilege_access='1000' 
+					FROM sys_privilege p WHERE p.privilege_master='ROLE' AND p.privilege_access='1000' and p.privilege_operation=1
 						AND p.privilege_master_value IN 
 							( SELECT distinct(r.id) FROM sys_role r,sys_inter_user_role ur WHERE r.id = ur.role_id AND ur.user_id=#{userId} ) 
 				 ) 
@@ -30,6 +48,176 @@
 		
 	</select>
 	
-
+	
+	<select id="getSysFunctionButtonByUserId" resultMap="ButtonResultMap">
+		
+		SELECT b.* FROM sys_function_button b 
+			WHERE b.id IN 
+				(SELECT p.privilege_access_value 
+					 FROM sys_privilege p WHERE p.privilege_master='ROLE' AND p.privilege_access='1001' and p.privilege_operation=1
+						 AND p.privilege_master_value IN 
+						 	( SELECT DISTINCT(r.id) FROM sys_role r,sys_inter_user_role ur WHERE r.id = ur.role_id AND ur.user_id=#{userId} ) 
+	 			 ) ORDER BY b.id
+	</select>
+  
+  
+  <sql id="Base_Column_List" >
+    ID, MENU_NAME, PARENT_ID, MENU_URL, MENU_CLASS, MENU_ICON, IS_LEAF, MENU_ORDER, MENU_LEVEL, 
+    PERMISSION, IS_VISIBLE, QUICK_ACTION
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="MenuResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from sys_function_menu
+    where ID = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from sys_function_menu
+    where ID = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.nis.domain.SysFunctionMenu" >
+    insert into sys_function_menu (ID, MENU_NAME, PARENT_ID, 
+      MENU_URL, MENU_CLASS, MENU_ICON, 
+      IS_LEAF, MENU_ORDER, MENU_LEVEL, 
+      PERMISSION, IS_VISIBLE, QUICK_ACTION
+      )
+    values (#{id,jdbcType=INTEGER}, #{menuName,jdbcType=VARCHAR}, #{parentId,jdbcType=INTEGER}, 
+      #{menuUrl,jdbcType=VARCHAR}, #{menuClass,jdbcType=VARCHAR}, #{menuIcon,jdbcType=VARCHAR}, 
+      #{isLeaf,jdbcType=INTEGER}, #{menuOrder,jdbcType=INTEGER}, #{menuLevel,jdbcType=INTEGER}, 
+      #{permission,jdbcType=VARCHAR}, #{isVisible,jdbcType=INTEGER}, #{quickAction,jdbcType=INTEGER}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.nis.domain.SysFunctionMenu" >
+    insert into sys_function_menu
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="menuName != null" >
+        MENU_NAME,
+      </if>
+      <if test="parentId != null" >
+        PARENT_ID,
+      </if>
+      <if test="menuUrl != null" >
+        MENU_URL,
+      </if>
+      <if test="menuClass != null" >
+        MENU_CLASS,
+      </if>
+      <if test="menuIcon != null" >
+        MENU_ICON,
+      </if>
+      <if test="isLeaf != null" >
+        IS_LEAF,
+      </if>
+      <if test="menuOrder != null" >
+        MENU_ORDER,
+      </if>
+      <if test="menuLevel != null" >
+        MENU_LEVEL,
+      </if>
+      <if test="permission != null" >
+        PERMISSION,
+      </if>
+      <if test="isVisible != null" >
+        IS_VISIBLE,
+      </if>
+      <if test="quickAction != null" >
+        QUICK_ACTION,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="menuName != null" >
+        #{menuName,jdbcType=VARCHAR},
+      </if>
+      <if test="parentId != null" >
+        #{parentId,jdbcType=INTEGER},
+      </if>
+      <if test="menuUrl != null" >
+        #{menuUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="menuClass != null" >
+        #{menuClass,jdbcType=VARCHAR},
+      </if>
+      <if test="menuIcon != null" >
+        #{menuIcon,jdbcType=VARCHAR},
+      </if>
+      <if test="isLeaf != null" >
+        #{isLeaf,jdbcType=INTEGER},
+      </if>
+      <if test="menuOrder != null" >
+        #{menuOrder,jdbcType=INTEGER},
+      </if>
+      <if test="menuLevel != null" >
+        #{menuLevel,jdbcType=INTEGER},
+      </if>
+      <if test="permission != null" >
+        #{permission,jdbcType=VARCHAR},
+      </if>
+      <if test="isVisible != null" >
+        #{isVisible,jdbcType=INTEGER},
+      </if>
+      <if test="quickAction != null" >
+        #{quickAction,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.nis.domain.SysFunctionMenu" >
+    update sys_function_menu
+    <set >
+      <if test="menuName != null" >
+        MENU_NAME = #{menuName,jdbcType=VARCHAR},
+      </if>
+      <if test="parentId != null" >
+        PARENT_ID = #{parentId,jdbcType=INTEGER},
+      </if>
+      <if test="menuUrl != null" >
+        MENU_URL = #{menuUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="menuClass != null" >
+        MENU_CLASS = #{menuClass,jdbcType=VARCHAR},
+      </if>
+      <if test="menuIcon != null" >
+        MENU_ICON = #{menuIcon,jdbcType=VARCHAR},
+      </if>
+      <if test="isLeaf != null" >
+        IS_LEAF = #{isLeaf,jdbcType=INTEGER},
+      </if>
+      <if test="menuOrder != null" >
+        MENU_ORDER = #{menuOrder,jdbcType=INTEGER},
+      </if>
+      <if test="menuLevel != null" >
+        MENU_LEVEL = #{menuLevel,jdbcType=INTEGER},
+      </if>
+      <if test="permission != null" >
+        PERMISSION = #{permission,jdbcType=VARCHAR},
+      </if>
+      <if test="isVisible != null" >
+        IS_VISIBLE = #{isVisible,jdbcType=INTEGER},
+      </if>
+      <if test="quickAction != null" >
+        QUICK_ACTION = #{quickAction,jdbcType=INTEGER},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.nis.domain.SysFunctionMenu" >
+    update sys_function_menu
+    set MENU_NAME = #{menuName,jdbcType=VARCHAR},
+      PARENT_ID = #{parentId,jdbcType=INTEGER},
+      MENU_URL = #{menuUrl,jdbcType=VARCHAR},
+      MENU_CLASS = #{menuClass,jdbcType=VARCHAR},
+      MENU_ICON = #{menuIcon,jdbcType=VARCHAR},
+      IS_LEAF = #{isLeaf,jdbcType=INTEGER},
+      MENU_ORDER = #{menuOrder,jdbcType=INTEGER},
+      MENU_LEVEL = #{menuLevel,jdbcType=INTEGER},
+      PERMISSION = #{permission,jdbcType=VARCHAR},
+      IS_VISIBLE = #{isVisible,jdbcType=INTEGER},
+      QUICK_ACTION = #{quickAction,jdbcType=INTEGER}
+    where ID = #{id,jdbcType=INTEGER}
+  </update>
 </mapper>
-

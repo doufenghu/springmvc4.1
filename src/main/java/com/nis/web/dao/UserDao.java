@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import com.nis.domain.SysUser;
 
 @Repository
-public interface UserDao {
+public interface UserDao extends CrudDao<SysUser> {
 	
 	/**
 	 * 通过主键ID获取相关用户，不包含密码
@@ -30,7 +30,12 @@ public interface UserDao {
 	void insertUser(SysUser user);
 	
 	
-	SysUser getUserByIdWithDepartment(long userId);
+	/**
+	 * 查询用户附带关联：部门、角色
+	 * @param user
+	 * @return
+	 */
+	SysUser getUserWithRelation(@Param("user") SysUser user);
 	
 	
 }

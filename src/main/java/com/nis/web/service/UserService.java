@@ -43,7 +43,7 @@ public class UserService {
 	}
 	
 	public SysUser getUserByIdWithDepartment(Long userId) {
-		return userDao.getUserByIdWithDepartment(userId);
+		return userDao.getUserWithRelation(new SysUser(userId, null));
 	}
 	
 	/**

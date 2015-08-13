@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+<%@ include file="/WEB-INF/include/taglib.jsp"%>
 <!DOCTYPE html>
 <html class="login_page">
 <head>
@@ -35,7 +36,7 @@
 <body>
 	  <div class="login_box">
             
-            <form action="dashboard.html" method="post" id="login_form">
+            <form action="${pageContext.request.contextPath }/login" method="post" id="login_form">
                 <div class="top_b">NIS 平台登录系统</div>    
                 <div class="alert alert-danger ${empty message ?'hide':'' } alert-login">
                    ${message }
@@ -52,7 +53,7 @@
                         </div>
                     </div>
                     
-                    <div class="formRow">
+                    <div class="formRow ${ (empty isValidateCodeLogin or isValidateCodeLogin==false) ?'hide':''  }">
                         <div class="input-prepend">
                             <span class="add-on"><i class="icon-lock"></i></span>
                             <input type="text" id="captcha" name="captcha" style="width:100px"/>
@@ -65,7 +66,7 @@
                     </div>
                 </div>
                 <div class="btm_b clearfix">
-                	<input type="hidden" name="mobileLogin" value="true">
+                	<input type="hidden" name="mobileLogin" value="false">
                     <button class="btn btn-inverse pull-right" type="submit">登录</button>
                     <span class="link_reg"><a href="#reg_form">Not registered? Sign up here</a></span>
                 </div>  
