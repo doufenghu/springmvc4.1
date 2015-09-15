@@ -12,6 +12,7 @@ import org.apache.shiro.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -51,9 +52,8 @@ public class LoginController extends BaseController {
 		
 		// 如果已经登录，则跳转到管理首页
 		if(principal != null && !principal.isMobileLogin()){
-			return "redirect:" + adminPath+"/index";
+			return "redirect:" + adminPath + "/index";
 		}
-	
 		
 		return "login";
 	}
@@ -110,7 +110,7 @@ public class LoginController extends BaseController {
 	
 	@RequiresPermissions("user")
 	@RequestMapping("/nis/index")
-	public String index(HttpServletRequest request, HttpServletResponse response){
+	public String index(HttpServletRequest request, HttpServletResponse response,ModelMap model){
 		Principal principal = UserUtils.getPrincipal();
 		// 登录成功后，验证码计算器清零
 		UserUtils.isValidateCodeLogin(principal.getLoginName(), false, true);
@@ -144,15 +144,19 @@ public class LoginController extends BaseController {
 				return renderString(response, principal);
 			}
 			if (request.getParameter("index") != null){
-				return "index";
+				return "home";
 			}
 			return "redirect:" + "/login";
 		}
 				
-		
-		return "index";
+		model.addAttribute("adminPath", adminPath);
+		return "/home";
 	}
 	
+	@RequestMapping(value="/validateCode")
+	public void validateCode(HttpServletRequest request, HttpServletResponse response,String captcha) {
+		renderString(response, UserUtils.validateCodeIsValid(captcha));
+	}
 	
 	
 	

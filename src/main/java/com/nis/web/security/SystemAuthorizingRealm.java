@@ -10,7 +10,9 @@ import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.SimpleAuthenticationInfo;
+import org.apache.shiro.authc.credential.DefaultPasswordService;
 import org.apache.shiro.authc.credential.HashedCredentialsMatcher;
+import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.Permission;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
@@ -50,6 +52,7 @@ public class SystemAuthorizingRealm extends AuthorizingRealm {
 
 	/**
 	 * 认证回调函数, 登录时调用
+	 * Authentication 存放用户名、密码地方，身份认证
 	 */
 	@Override
 	protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authcToken) {
@@ -65,9 +68,8 @@ public class SystemAuthorizingRealm extends AuthorizingRealm {
 		
 		// 校验登录验证码
 		if (UserUtils.isValidateCodeLogin(token.getUsername(), false, false)){
-			Session session = UserUtils.getSession();
-			String code = (String)session.getAttribute(Constants.KAPTCHA_SESSION_KEY);
-			if (token.getCaptcha() == null || !token.getCaptcha().toUpperCase().equals(code)){
+			
+			if (UserUtils.validateCodeIsValid(token.getCaptcha())){
 				throw new AuthenticationException("msg:验证码错误, 请重试.");
 			}
 		}
@@ -86,10 +88,12 @@ public class SystemAuthorizingRealm extends AuthorizingRealm {
 
 	/**
 	 * 授权查询回调函数, 进行鉴权但缓存中无用户的授权信息时调用
+	 * Authorzation 授权，存放用户权限
 	 */
 	@Override
 	protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
 		Principal principal = (Principal) getAvailablePrincipal(principals);
+		
 		// 获取当前已登录的用户
 		if (!com.nis.util.Constants.TRUE.equals(Configurations.getStringProperty("user.multiAccountLogin","true"))){
 			Collection<Session> sessions = systemService.getActiveSessions(true, principal, UserUtils.getSession());
@@ -111,10 +115,8 @@ public class SystemAuthorizingRealm extends AuthorizingRealm {
 		if (user != null) {
 			SimpleAuthorizationInfo info = new SimpleAuthorizationInfo();
 			List<SysFunctionMenu> list = UserUtils.getMenuList();
-			
 			if(!StringUtil.isEmpty(list)) {
-				List<SysFunctionMenu> treeList = new TreeUtil(list).buildTree();
-				for (SysFunctionMenu menu :treeList) {
+				for (SysFunctionMenu menu :list) {
 					if (!StringUtil.isBlank(menu.getPermission())) {
 						// 添加基于Permission的权限信息
 						for (String permission : StringUtils.split(menu.getPermission(),",")){

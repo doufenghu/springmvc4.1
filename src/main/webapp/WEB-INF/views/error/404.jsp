@@ -1,27 +1,32 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
+<%
+response.setStatus(404);
+
+// 如果是异步请求或是手机端，则直接返回信息
+if (Servlets.isAjaxRequest(request)) {
+	out.print("页面不存在.");
+}
+
+//输出异常信息页面
+else {
+%>
+<%@page import="com.nis.web.security.Servlets"%>
+<%@page contentType="text/html;charset=UTF-8" isErrorPage="true"%>
+<%@include file="/WEB-INF/include/taglib.jsp"%>
 <!DOCTYPE html>
-<html class="error_page">
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Error Page - 404</title>
-		<!-- Bootstrap framework -->
-            <link rel="stylesheet" href="${pageContext.request.contextPath}/static/bootstrap/css/bootstrap.min.css" />
-            <link rel="stylesheet" href="${pageContext.request.contextPath}/static/bootstrap/css/bootstrap-responsive.min.css" />
-		<!-- main styles -->
-            <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/style.css" />
-			
-            <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/font_Jockey_one.css" />
-            
-	</head>
-	<body>
-
-		<div class="error_box">
-			<h1>404 Page/页面未找到</h1>
-			<p>访问的页面或文件被移除或者未找到访问请求路径！</p>
-			<a href="javascript:history.back()" class="back_link btn btn-small">Go back</a>
-		</div>
-
-	</body>
+<html>
+<head>
+	<title>404 - 页面不存在</title>
+	<%@include file="/WEB-INF/include/header.jsp" %>
+</head>
+<body>
+	<div class="container-fluid">
+		<div class="page-header"><h1>页面不存在.</h1></div>
+		<div><a href="javascript:" onclick="history.go(-1);" class="btn">返回上一页</a></div>
+		<script>try{top.$.jBox.closeTip();}catch(e){}</script>
+	</div>
+</body>
 </html>
+<%
+out.print("<!--"+request.getAttribute("javax.servlet.forward.request_uri")+"-->");
+} out = pageContext.pushBody();
+%>

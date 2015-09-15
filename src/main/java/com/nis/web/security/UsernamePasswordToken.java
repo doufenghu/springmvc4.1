@@ -1,5 +1,7 @@
 package com.nis.web.security;
 
+import org.apache.shiro.web.filter.authc.LogoutFilter;
+
 
 public class UsernamePasswordToken extends org.apache.shiro.authc.UsernamePasswordToken {
 	

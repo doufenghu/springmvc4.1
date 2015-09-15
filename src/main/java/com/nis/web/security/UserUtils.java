@@ -5,15 +5,19 @@ import java.util.Map;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.UnavailableSecurityManagerException;
+import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.session.InvalidSessionException;
 import org.apache.shiro.session.Session;
 import org.apache.shiro.subject.Subject;
 
+import com.google.code.kaptcha.Constants;
 import com.google.common.collect.Maps;
 import com.nis.domain.SysFunctionButton;
 import com.nis.domain.SysFunctionMenu;
 import com.nis.domain.SysUser;
 import com.nis.util.CacheUtils;
+import com.nis.util.StringUtil;
+import com.nis.util.TreeUtil;
 import com.nis.web.dao.SysFunctionMenuDao;
 import com.nis.web.dao.UserDao;
 import com.nis.web.security.SystemAuthorizingRealm.Principal;
@@ -110,6 +114,17 @@ public class UserUtils {
 		// 如果没有登录，则返回实例化空的User对象。
 		return new SysUser();
 	}
+	
+	
+	/**
+	 * 验证码是否合法
+	 * @param validateCode
+	 * @return
+	 */
+	public static boolean validateCodeIsValid(String validateCode) {
+		String code = (String) getSession().getAttribute(Constants.KAPTCHA_SESSION_KEY);
+		return (StringUtil.isBlank(validateCode) || !validateCode.toUpperCase().equals(code))? false : true;
+	}
 
 	/**
 	 * 获取当前用户角色列表
@@ -149,6 +164,15 @@ public class UserUtils {
 		
 		return menuList;
 	}
+	
+	/**
+	 * 按照菜单各级递归排列
+	 * @return
+	 */
+	public static List<SysFunctionMenu> getMenuTreeList(){
+		return  new TreeUtil(getMenuList()).buildTree();
+	}
+	
 	
 	/**
 	 * 构建菜单关联所对应的权限按钮

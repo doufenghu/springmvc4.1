@@ -1,27 +1,59 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
+<%
+response.setStatus(500);
+
+// 获取异常类
+Throwable ex = Exceptions.getThrowable(request);
+if (ex != null){
+	LoggerFactory.getLogger("500.jsp").error(ex.getMessage(), ex);
+}
+
+// 编译错误信息
+StringBuilder sb = new StringBuilder("错误信息：\n");
+if (ex != null) {
+	sb.append(Exceptions.getStackTraceAsString(ex));
+} else {
+	sb.append("未知错误.\n\n");
+}
+
+// 如果是异步请求或是手机端，则直接返回信息
+if (Servlets.isAjaxRequest(request)) {
+	out.print(sb);
+}
+
+// 输出异常信息页面
+else {
+%>
+<%@page import="org.slf4j.Logger,org.slf4j.LoggerFactory"%>
+<%@page import="com.nis.web.security.Servlets"%>
+<%@page import="com.nis.util.Exceptions"%>
+<%@page import="com.nis.util.StringUtils"%>
+<%@page contentType="text/html;charset=UTF-8" isErrorPage="true"%>
+<%@include file="/WEB-INF/include/taglib.jsp"%>
 <!DOCTYPE html>
-<html class="error_page">
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Error Page - 500</title>
-		<!-- Bootstrap framework -->
-            <link rel="stylesheet" href="${pageContext.request.contextPath}/static/bootstrap/css/bootstrap.min.css" />
-            <link rel="stylesheet" href="${pageContext.request.contextPath}/static/bootstrap/css/bootstrap-responsive.min.css" />
-		<!-- main styles -->
-            <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/style.css" />
-			
-            <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/font_Jockey_one.css" />
-            
-	</head>
-	<body>
-
-		<div class="error_box">
-			<h1>500 Page/服务器内部错误</h1>
-			<p>您正在访问的网站出现了服务器问题，该问题阻止了页面的显示！</p>
-			<a href="javascript:history.back()" class="back_link btn btn-small">Go back</a>
+<html>
+<head>
+	<title>500 - 系统内部错误</title>
+	<%@include file="/WEB-INF/include/header.jsp" %>
+</head>
+<body>
+	<div class="container-fluid">
+		<div class="page-header"><h1>系统内部错误.</h1></div>
+		<div class="errorMessage">
+			错误信息：<%=ex==null?"未知错误.":StringUtils.toHtml(ex.getMessage())%> <br/> <br/>
+			请点击“查看详细信息”按钮，将详细错误信息发送给系统管理员，谢谢！<br/> <br/>
+			<a href="javascript:" onclick="history.go(-1);" class="btn">返回上一页</a> &nbsp;
+			<a href="javascript:" onclick="$('.errorMessage').toggle();" class="btn">查看详细信息</a>
 		</div>
-
-	</body>
+		<div class="errorMessage hide">
+			<%=StringUtils.toHtml(sb.toString())%> <br/>
+			<a href="javascript:" onclick="history.go(-1);" class="btn">返回上一页</a> &nbsp;
+			<a href="javascript:" onclick="$('.errorMessage').toggle();" class="btn">隐藏详细信息</a>
+			<br/> <br/>
+		</div>
+		<script>try{top.$.jBox.closeTip();}catch(e){}</script>
+	</div>
+</body>
 </html>
+<%
+} out = pageContext.pushBody();
+%>

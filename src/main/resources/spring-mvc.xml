@@ -26,14 +26,17 @@
 	         http://www.springframework.org/schema/cache/spring-cache.xsd
 	         http://www.springframework.org/schema/task 
 	         http://www.springframework.org/schema/task/spring-task.xsd">
-  	
+  
+	  <!-- 加载配置属性文件 -->
+	<context:property-placeholder ignore-unresolvable="true" location="classpath:nis.properties" />
+	
   	<!-- 静态资源访问，交由default Servlet handler -->
   	<mvc:default-servlet-handler/>
   	<!-- 静态资源映射 -->
     <mvc:resources mapping="/static/**" location="/static/" cache-period="31536000"/>
     
    <!-- 定义无Controller的path<->view直接映射 -->
-	<mvc:view-controller path="/" view-name="redirect:/nis/index}"/>
+	<mvc:view-controller path="/" view-name="redirect:/nis/index"/>
   	
   	<!-- 启用spring mvc注解 -->
   	<context:annotation-config/>

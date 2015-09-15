@@ -2,6 +2,8 @@ package com.nis.domain;
 
 import java.io.Serializable;
 
+import org.apache.shiro.web.servlet.OncePerRequestFilter;
+
 public class SysFunctionButton implements Serializable {
 	/**
 	 * Aug 19, 2013
@@ -15,6 +17,13 @@ public class SysFunctionButton implements Serializable {
 	private String btnClass;
 	private String btnIcon;
 	private String btnScript;
+	 private String permission;
+	public String getPermission() {
+		return permission;
+	}
+	public void setPermission(String permission) {
+		this.permission = permission;
+	}
 	private int status;
 	private Long menuId;
 	public Long getId() {

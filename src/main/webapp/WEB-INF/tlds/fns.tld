@@ -54,6 +54,14 @@
     <example>${fns:getMenuList()}</example>  
   </function>
   
+   <function>
+    <description>获取当前用户的菜单树对象列表</description>
+    <name>getMenuTreeList</name>
+    <function-class>com.nis.web.security.UserUtils</function-class>
+    <function-signature>java.util.List getMenuTreeList()</function-signature>
+    <example>${fns:getMenuTreeList()}</example>  
+  </function>
+  
   <function>
     <description>获取当前用户的区域对象列表</description>
     <name>getAreaList</name>
@@ -153,6 +161,17 @@
     <function-signature>java.lang.String jsGetVal(java.lang.String)</function-signature>
     <example>${fns:jsGetVal('row.user.id')}  返回：!row?'':!row.user?'':!row.user.id?'':row.user.id</example>  
   </function>
+ 
+ <!-- DictUtils -->
+ <function>
+    <description>获取字典对象列表</description>
+    <name>getDictList</name>
+    <function-class>com.nis.util.DictUtils</function-class>
+    <function-signature>java.util.List getDictList(java.lang.String)</function-signature>
+    <example>${fns:getDictList(type)}</example>  
+  </function>
+  
+  
   
   <!-- DateUtils -->
   <function>

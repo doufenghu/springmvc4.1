@@ -9,8 +9,8 @@
 	<description>Shiro Configuration</description>
 	
 	 <!-- 引入jdbc.properties,加密密码 ;<context:property-placeholder location="classpath:jdbc.properties" />-->
-	<bean id="propertyConfigurer" class="com.nis.util.PropertyPlaceholderConfigurerCrypt">
-		<property name="locations">
+	<bean id="propertyConfigurer"  class="com.nis.util.PropertyPlaceholderConfigurerCrypt">
+		<property name="locations" >
 			<list>
 				<value>classpath:jdbc.properties</value>
 				<value>classpath:nis.properties</value>
