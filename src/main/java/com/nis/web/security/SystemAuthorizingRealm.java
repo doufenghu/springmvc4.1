@@ -27,10 +27,12 @@ import org.springframework.stereotype.Service;
 
 import com.google.code.kaptcha.Constants;
 import com.nis.domain.SysFunctionMenu;
+import com.nis.domain.SysMenu;
 import com.nis.domain.SysRole;
 import com.nis.domain.SysUser;
 import com.nis.util.Configurations;
 import com.nis.util.Encodes;
+import com.nis.util.LogUtils;
 import com.nis.util.StringUtil;
 import com.nis.util.StringUtils;
 import com.nis.util.TreeUtil;
@@ -114,9 +116,9 @@ public class SystemAuthorizingRealm extends AuthorizingRealm {
 		SysUser user = systemService.getUserByLoginName(principal.getLoginName());
 		if (user != null) {
 			SimpleAuthorizationInfo info = new SimpleAuthorizationInfo();
-			List<SysFunctionMenu> list = UserUtils.getMenuList();
+			List<SysMenu> list = UserUtils.getMenuList();
 			if(!StringUtil.isEmpty(list)) {
-				for (SysFunctionMenu menu :list) {
+				for (SysMenu menu :list) {
 					if (!StringUtil.isBlank(menu.getPermission())) {
 						// 添加基于Permission的权限信息
 						for (String permission : StringUtils.split(menu.getPermission(),",")){
@@ -133,9 +135,9 @@ public class SystemAuthorizingRealm extends AuthorizingRealm {
 				info.addRole(role.getName());
 			}
 			// 更新登录IP和时间,集成用户日志记录
-			//getSystemService().updateUserLoginInfo(user);
+			//systemService.updateUserLoginInfo(user);
 			// 记录登录日志
-			//LogUtils.saveLog(Servlets.getRequest(), "系统登录");
+			LogUtils.saveLog(Servlets.getRequest(), "系统登录");
 			return info;
 		}
 		return null;
@@ -280,6 +282,11 @@ public class SystemAuthorizingRealm extends AuthorizingRealm {
 			}catch (Exception e) {
 				return "";
 			}
+		}
+		
+		@Override
+		public String toString() {
+			return String.valueOf(id);
 		}
 		
 		

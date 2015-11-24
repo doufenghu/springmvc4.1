@@ -34,6 +34,7 @@
   	<mvc:default-servlet-handler/>
   	<!-- 静态资源映射 -->
     <mvc:resources mapping="/static/**" location="/static/" cache-period="31536000"/>
+    <mvc:resources mapping="/upload/**" location="/upload/" cache-period="31536000"/>
     
    <!-- 定义无Controller的path<->view直接映射 -->
 	<mvc:view-controller path="/" view-name="redirect:/nis/index"/>
@@ -52,14 +53,77 @@
   	<!-- autodetection of such annotated controllers -->
 	<context:component-scan base-package="com.nis.web"></context:component-scan>
 	
+	<!-- 默认的注解映射的支持，org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping -->
+	<mvc:annotation-driven content-negotiation-manager="contentNegotiationManager">
+		<mvc:message-converters register-defaults="true">
+			<!-- 将StringHttpMessageConverter的默认编码设为UTF-8 -->
+			<bean class="org.springframework.http.converter.StringHttpMessageConverter">
+		    	<constructor-arg value="UTF-8" />
+			</bean>
+			<!-- 将Jackson2HttpMessageConverter的默认格式化输出为false -->
+			<bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+                <property name="supportedMediaTypes">
+                	<list><value>application/json;charset=UTF-8</value></list>
+                </property>
+                <property name="prettyPrint" value="false"/>
+                <property name="objectMapper">  
+                    <bean class="com.nis.util.JsonMapper"></bean>  
+                </property> 
+            </bean>
+            <!-- 使用XML格式输出数据 -->
+            <bean class="org.springframework.http.converter.xml.MarshallingHttpMessageConverter">
+		        <constructor-arg>
+		        	<bean class="org.springframework.oxm.xstream.XStreamMarshaller">
+				        <property name="streamDriver">
+				            <bean class="com.thoughtworks.xstream.io.xml.StaxDriver"/>
+				        </property>
+				        <property name="annotatedClasses">
+				            <list>
+				                <value>com.nis.domain.BaseEntity</value>
+				                <value>com.nis.supcan.TreeList</value>
+				                <value>com.nis.supcan.Col</value>
+				                <value>com.nis.supcan.Group</value>
+				            </list>
+				        </property>
+				    </bean>
+		        </constructor-arg>
+		        <property name="supportedMediaTypes" value="application/xml"></property>
+			</bean>
+		</mvc:message-converters>
+	</mvc:annotation-driven>
+	
+	
+	<!-- REST中根据URL后缀自动判定Content-Type及相应的View -->
+	<bean id="contentNegotiationManager" class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
+	    <property name="mediaTypes" >
+	        <map> 
+                <entry key="xml" value="application/xml"/> 
+                <entry key="json" value="application/json"/> 
+            </map>
+	    </property>
+        <property name="ignoreAcceptHeader" value="true"/>
+        <property name="favorPathExtension" value="true"/>
+	</bean>
 	
 	
 	<mvc:interceptors>
+	
+		<mvc:interceptor>
+			<mvc:mapping path="/nis/**" />
+			<mvc:exclude-mapping path="/nis/"/>
+			<mvc:exclude-mapping path="/nis/login"/>
+			<mvc:exclude-mapping path="/nis/sys/menu/tree"/>
+			<mvc:exclude-mapping path="/nis/sys/menu/treeData"/>
+			<mvc:exclude-mapping path="/nis/oa/oaNotify/self/count"/>
+			<bean class="com.nis.interceptor.LogInterceptor" />
+		</mvc:interceptor>
+		
 		<!-- 数据源拦截器，该拦截路径下使用数据源B -->
   		<mvc:interceptor>
   			<mvc:mapping path="/user/*"/>
   			<bean class="com.nis.interceptor.DataSourceBInterceptor"></bean>
   		</mvc:interceptor>
+  		
   	</mvc:interceptors>
 	
 	<!-- 视图文件解析 -->

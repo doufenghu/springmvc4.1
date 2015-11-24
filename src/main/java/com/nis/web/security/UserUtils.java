@@ -5,22 +5,30 @@ import java.util.Map;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.UnavailableSecurityManagerException;
-import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.session.InvalidSessionException;
 import org.apache.shiro.session.Session;
 import org.apache.shiro.subject.Subject;
 
 import com.google.code.kaptcha.Constants;
 import com.google.common.collect.Maps;
+import com.nis.domain.SysArea;
 import com.nis.domain.SysFunctionButton;
 import com.nis.domain.SysFunctionMenu;
+import com.nis.domain.SysMenu;
+import com.nis.domain.SysOffice;
+import com.nis.domain.SysRole;
 import com.nis.domain.SysUser;
 import com.nis.util.CacheUtils;
 import com.nis.util.StringUtil;
 import com.nis.util.TreeUtil;
+import com.nis.web.dao.SysAreaDao;
 import com.nis.web.dao.SysFunctionMenuDao;
+import com.nis.web.dao.SysMenuDao;
+import com.nis.web.dao.SysOfficeDao;
+import com.nis.web.dao.SysRoleDao;
 import com.nis.web.dao.UserDao;
 import com.nis.web.security.SystemAuthorizingRealm.Principal;
+import com.nis.web.service.BaseService;
 import com.nis.web.service.SpringContextHolder;
 
 
@@ -33,8 +41,11 @@ public class UserUtils {
 
 	private static UserDao userDao = SpringContextHolder.getBean(UserDao.class);
 	private static SysFunctionMenuDao menuDao = SpringContextHolder.getBean(SysFunctionMenuDao.class);
-	/*private static RoleDao roleDao = SpringContextHolder.getBean(RoleDao.class);
-	*/
+	private static SysOfficeDao officeDao = SpringContextHolder.getBean(SysOfficeDao.class);
+	private static SysRoleDao roleDao = SpringContextHolder.getBean(SysRoleDao.class);
+	private static SysMenuDao sysMenuDao = SpringContextHolder.getBean(SysMenuDao.class);
+	private static SysAreaDao areaDao = SpringContextHolder.getBean(SysAreaDao.class);
+
 
 	public static final String USER_CACHE = "userCache";
 	public static final String USER_CACHE_ID_ = "id_";
@@ -43,6 +54,9 @@ public class UserUtils {
 
 	public static final String CACHE_ROLE_LIST = "roleList";
 	public static final String CACHE_MENU_LIST = "menuList";
+	public static final String CACHE_AREA_LIST = "areaList";
+	public static final String CACHE_OFFICE_LIST = "officeList";
+	public static final String CACHE_OFFICE_ALL_LIST = "officeAllList";
 	/**
 	 * 根据ID获取用户
 	 * @param id
@@ -85,7 +99,10 @@ public class UserUtils {
 	public static void clearCache(){
 		removeCache(CACHE_ROLE_LIST);
 		removeCache(CACHE_MENU_LIST);
-		//UserUtils.clearCache(getUser());
+		removeCache(CACHE_AREA_LIST);
+		removeCache(CACHE_OFFICE_LIST);
+		removeCache(CACHE_OFFICE_ALL_LIST);
+		UserUtils.clearCache(getUser());
 	}
 	
 	/**
@@ -96,6 +113,10 @@ public class UserUtils {
 		CacheUtils.remove(USER_CACHE, USER_CACHE_ID_ + user.getId());
 		CacheUtils.remove(USER_CACHE, USER_CACHE_LOGIN_NAME_ + user.getLoginId());
 		CacheUtils.remove(USER_CACHE, USER_CACHE_LOGIN_NAME_ + user.getOldLoginId());
+		if (user.getOffice() != null && user.getOffice().getId() != null){
+			CacheUtils.remove(USER_CACHE, USER_CACHE_LIST_BY_OFFICE_ID_ + user.getOffice().getId());
+		}
+
 	}
 	
 	/**
@@ -129,29 +150,25 @@ public class UserUtils {
 	/**
 	 * 获取当前用户角色列表
 	 * @return
-	 *//*
-	public static List<Role> getRoleList(){
+	 */
+	public static List<SysRole> getRoleList(){
 		@SuppressWarnings("unchecked")
-		List<Role> roleList = (List<Role>)getCache(CACHE_ROLE_LIST);
+		List<SysRole> roleList = (List<SysRole>)getCache(CACHE_ROLE_LIST);
 		if (roleList == null){
-			User user = getUser();
-			if (user.isAdmin()){
-				roleList = roleDao.findAllList(new Role());
-			}else{
-				Role role = new Role();
-				role.getSqlMap().put("dsf", BaseService.dataScopeFilter(user.getCurrentUser(), "o", "u"));
-				roleList = roleDao.findList(role);
-			}
+			roleList = roleDao.findAllList(new SysRole());
 			putCache(CACHE_ROLE_LIST, roleList);
 		}
 		return roleList;
-	}*/
+	}
+	
+	
 	
 	/**
 	 * 获取当前用户授权菜单
 	 * @return
 	 */
-	public static List<SysFunctionMenu> getMenuList(){
+	@Deprecated
+	public static List<SysFunctionMenu> getOld2MenuList(){
 		@SuppressWarnings("unchecked")
 		List<SysFunctionMenu> menuList = (List<SysFunctionMenu>)getCache(CACHE_MENU_LIST);
 		
@@ -165,11 +182,36 @@ public class UserUtils {
 		return menuList;
 	}
 	
+	
+	/**
+	 * 获取当前用户授权菜单
+	 * @return
+	 */
+	public static List<SysMenu> getMenuList(){
+		@SuppressWarnings("unchecked")
+		List<SysMenu> menuList = (List<SysMenu>)getCache(CACHE_MENU_LIST);
+		if (menuList == null){
+			SysUser user = getUser();
+			if (user.isAdmin()){
+				menuList = sysMenuDao.findAllList(new SysMenu());
+			}else{
+				menuList = sysMenuDao.findSysMenuByUserId(user.getId());
+			}
+			putCache(CACHE_MENU_LIST, menuList);
+		}
+		return menuList;
+		
+		
+		
+	}
+	
+	
+	
 	/**
 	 * 按照菜单各级递归排列
 	 * @return
 	 */
-	public static List<SysFunctionMenu> getMenuTreeList(){
+	public static List<SysMenu> getMenuTreeList(){
 		return  new TreeUtil(getMenuList()).buildTree();
 	}
 	
@@ -199,16 +241,16 @@ public class UserUtils {
 	/**
 	 * 获取当前用户有权限访问的部门
 	 * @return
-	 *//*
-	public static List<Office> getOfficeList(){
+	 */
+	public static List<SysOffice> getOfficeList(){
 		@SuppressWarnings("unchecked")
-		List<Office> officeList = (List<Office>)getCache(CACHE_OFFICE_LIST);
+		List<SysOffice> officeList = (List<SysOffice>)getCache(CACHE_OFFICE_LIST);
 		if (officeList == null){
-			User user = getUser();
+			SysUser user = getUser();
 			if (user.isAdmin()){
-				officeList = officeDao.findAllList(new Office());
+				officeList = officeDao.findAllList(new SysOffice());
 			}else{
-				Office office = new Office();
+				SysOffice office = new SysOffice();
 				office.getSqlMap().put("dsf", BaseService.dataScopeFilter(user, "a", ""));
 				officeList = officeDao.findList(office);
 			}
@@ -217,18 +259,34 @@ public class UserUtils {
 		return officeList;
 	}
 
-	*//**
+	
+	
+	/**
+	 * 获取当前用户授权的区域
+	 * @return
+	 */
+	public static List<SysArea> getAreaList(){
+		@SuppressWarnings("unchecked")
+		List<SysArea> areaList = (List<SysArea>)getCache(CACHE_AREA_LIST);
+		if (areaList == null){
+			areaList = areaDao.findAllList(new SysArea());
+			putCache(CACHE_AREA_LIST, areaList);
+		}
+		return areaList;
+	}
+	
+	/**
 	 * 获取当前用户有权限访问的部门
 	 * @return
-	 *//*
-	public static List<Office> getOfficeAllList(){
+	 */
+	public static List<SysOffice> getOfficeAllList(){
 		@SuppressWarnings("unchecked")
-		List<Office> officeList = (List<Office>)getCache(CACHE_OFFICE_ALL_LIST);
+		List<SysOffice> officeList = (List<SysOffice>)getCache(CACHE_OFFICE_ALL_LIST);
 		if (officeList == null){
-			officeList = officeDao.findAllList(new Office());
+			officeList = officeDao.findAllList(new SysOffice());
 		}
 		return officeList;
-	}*/
+	}
 	
 	/**
 	 * 获取授权主要对象

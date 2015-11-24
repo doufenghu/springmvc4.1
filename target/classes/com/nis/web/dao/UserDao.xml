@@ -2,13 +2,22 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.nis.web.dao.UserDao">
 	
+	<!-- 生产环境使用-->
 	<cache eviction="LRU" flushInterval="60000" size="512" readOnly="true">
 	</cache>
+	 
+	
+	
+	
+	
+	
 	<!-- 通过别名映射对象 -->
 	<select id="getUserById" parameterType="long" resultType="sysUser">
 		select 
 			id as "id",
 			login_id as "loginId",
+			name,
+			photo,
 			email email,
 			create_time createTime,
 			status status
@@ -20,6 +29,7 @@
 			id,
 			login_id,
 			name,
+			photo,
 			email,
 			create_time,
 			status
@@ -31,6 +41,7 @@
 		<id property="id" column="id"/>
 		<result property="loginId" column="login_id"/>
 		<result property="name" column="name"/>
+		<result property="photo" column="photo"/>
 		<result property="email" column="email"/>
 		<result property="createTime" column="create_time"/>
 		<result property="status" column="status"/>
@@ -40,27 +51,36 @@
 		<id property="id" column="user_id"/>
 		<result property="loginId" column="login_id"/>
 		<result property="name" column="user_name"/>
+		<result property="photo" column="photo"/>
 		<result property="password" column="password"/>
 		<result property="email" column="email"/>
 		<result property="createTime" column="user_create_time"/>
 		<result property="status" column="user_status"/>
-		<collection property="userDeptList" ofType="sysDepartment">
-			<id property="id" column="depart_id"/>
-			<result property="deptNo" column="dept_no"/>
-			<result property="deptName" column="dept_name"/>
-			<result property="deptNameEn" column="dept_name_en"/>
-			<result property="deptNameShort" column="dept_name_short"/>
-			<result property="parentId" column="parent_id"/>
-			<result property="isLeaf" column="is_leaf"/>
-			<result property="orderNumber" column="order_number"/>
-			<result property="createTime" column="depart_create_time"/>
-			<result property="status" column="dept_status"/>
+		
+		
+		<collection property="userOfficeList" ofType="sysOffice">
+			<id property="id" column="office_id"/>
+			<result property="parent.id" column="office_parent_id"/>
+			<result property="parentIds" column="office_parent_ids"/>
+			<result property="name" column="office_name"/>
+			<result property="sort" column="office_short"/>
+			<result property="area.id" column="area_id"/>
+			<result property="code" column="code"/>
+			<result property="type" column="office_type"/>
+			<result property="grade" column="office_grade"/>
+			<result property="useable" column="office_userable"/>
+			<result property="remarks" column="office_remarks"/>
+			<result property="delFlag" column="office_del_flag"/>
 		</collection>
+		
+		 
+		
 		
 		<collection property="userRoleList" ofType="sysRole">
 			<id property="id" column="role_id"/>
 			<result property="name" column="role_name"/>
-			<result property="desc" column="role_desc"/>
+			<result property="dataScope" column="data_scope"/>
+			<result property="remark" column="role_desc"/>
 			<result property="status" column="role_status"/>
 			<result property="createTime" column="role_create_time"/>
 		</collection>
@@ -68,53 +88,268 @@
 		
 	</resultMap>
 	
+	
+	<resultMap type="sysUser" id="userWithOfficeResultMap">
+		<id property="id" column="user_id"/>
+		<result property="loginId" column="login_id"/>
+		<result property="name" column="user_name"/>
+		<result property="photo" column="photo"/>
+		<result property="email" column="email"/>
+		<result property="createTime" column="user_create_time"/>
+		<result property="status" column="user_status"/>
+		
+		<collection property="userOfficeList" ofType="sysOffice">
+			<id property="id" column="office_id"/>
+			<result property="name" column="office_name"/>
+		</collection>
+	</resultMap>
+	
+	
+	
+	
+	<select id="findUserByRoleId" resultMap="userWithOfficeResultMap">
+		SELECT
+			
+			u.id AS user_id, 
+			u.login_id, 
+			u.name AS user_name, 
+			u.photo,
+			u.password, 
+			u.email, 
+			u.create_time AS user_create_time, 
+			u.status AS user_status, 
+			o.id AS office_id, 
+			o.name AS office_name
+			
+		FROM sys_user u
+			JOIN sys_inter_user_role ir ON u.id=ir.user_id and ir.role_id=#{id}
+			LEFT JOIN sys_inter_user_office id ON u.id=id.user_id 
+			LEFT JOIN sys_office o ON o.id=id.office_id AND o.useable=1
+		WHERE u.status=1 
+		
+	</select>
+	
+	
+	<!-- 通过别名映射对象 -->
+	<select id="findUserByOfficeId" parameterType="long" resultType="sysUser">
+		select 
+			id as "id",
+			login_id as "loginId", 
+			name,
+			photo,
+			email email,
+			create_time createTime,
+			status status
+		from sys_user  where  id in (select user_id from sys_inter_user_office where office_id=#{id})
+	</select>
+	
+	<sql id="userColumns">
+    	u.id AS user_id, 
+    	u.photo,
+		u.login_id, 
+		u.name AS user_name, 
+		u.password, 
+		u.email, 
+		u.create_time AS user_create_time, 
+		u.status AS user_status, 
+		o.id AS office_id, 
+		o.parent_id AS office_parent_id, 
+		o.parent_ids AS office_parent_ids, 
+		o.name AS office_name, 
+		o.sort AS office_sort, 
+		o.area_id, 
+		o.code, 
+		o.type AS office_type, 
+ 		o.grade AS office_grade, 
+ 		o.useable AS office_userable, 
+ 		o.remarks AS office_remarks, 
+ 		o.del_flag AS office_del_flag,
+  		r.id AS role_id, 
+  		r.name AS role_name, 
+  		r.data_scope,
+  		r.remark AS role_desc, 
+  		r.status AS role_status, 
+  		r.create_time AS role_create_time
+    </sql>
+    
+    <sql id="userJoins">
+		LEFT JOIN sys_inter_user_role ir ON u.id=ir.user_id 
+ 		LEFT JOIN sys_role r ON r.id=ir.role_id  AND r.status=1
+		LEFT JOIN sys_inter_user_office id ON u.id=id.user_id 
+		LEFT JOIN sys_office o ON o.id=id.office_id AND o.useable=1
+    </sql>
+    
+    
 	<select id="getUserWithRelation" resultMap="userWithRelationResultMap">
+		SELECT
+			<include refid="userColumns"/>
+		FROM sys_user u
+			<include refid="userJoins"/>
+		WHERE u.status=#{DEL_FLAG_NORMAL} 
+		
+		<if test=" id != null">
+			AND u.id=#{id}
+		</if>
 			
-		SELECT 
-			u.id AS user_id,
+		<if test=" loginId != null">
+			AND u.login_id=#{loginId} 
+		</if>
+		
+	</select>
+	
+	
+	
+
+	 
+   
+	
+	<select id="findList" resultMap="userResultMap">
+	
+		select 
+			u.id,
 			u.login_id,
-			u.name AS user_name,
-			u.password,
+			u.photo,
+			u.name,
 			u.email,
-			u.create_time AS user_create_time,
-			u.status AS user_status,
-			d.id AS depart_id,
-			d.dept_no,
-			d.dept_name,
-			d.dept_name_en,
-			d.dept_name_short,
-			d.parent_id,
-			d.is_leaf,
-			d.order_number,
-			d.create_time AS depart_create_time ,
-			d.status AS dept_status,
-			r.id AS role_id,
-			r.name AS role_name,
-			r.desc AS role_desc,
-			r.status AS role_status,
-			r.create_time AS role_create_time
-			FROM sys_user u,sys_department d,sys_inter_user_department id,sys_role r,sys_inter_user_role ir 
-			WHERE u.id=id.user_id AND d.id=id.dept_id AND u.id=ir.user_id AND r.id=ir.role_id AND u.status=1 
-			AND r.status=1
+			u.create_time,
+			u.status
+		from sys_user u 
+		WHERE u.status=#{DEL_FLAG_NORMAL} 
+		
+		
+		<if test="office != null  and office.id != null ">
+			AND u.id in (select distinct(id.user_id) from sys_inter_user_office id,sys_office o where id.office_id = o.id 
+				 AND o.useable=1  AND ( o.id=#{office.id} or  o.parent_ids LIKE
+					<if test="dbName == 'oracle'">'%,'||#{office.id}||',%')</if>
+					<if test="dbName == 'mssql'">'%,'+#{office.id}+',%')</if>
+					<if test="dbName == 'mysql'">CONCAT('%,', #{office.id}, ',%'))</if>
 			
-			<if test=" user != null and user.id != null">
-				AND u.id=#{user.id}
-			</if>
+			 )  
 			
-			<if test=" user != null and user.loginId != null">
-				AND u.login_id=#{user.loginId} 
-			</if>
+		</if>
+		<!-- 数据范围过滤 -->
+		<if test="sqlMap.dsf!=''">
+			AND u.id in (select distinct(id.user_id) from sys_inter_user_office id,sys_office o where id.office_id = o.id 
+				 AND o.useable=1  ${sqlMap.dsf}
+			 )  
+		</if>
+		
+		
+		
+		
+		
+		<!-- 如果不是超级管理员，则不显示超级管理员用户 -->
+		<if test="!currentUser.admin">
+			AND u.login_id != 'admin'
+		</if>
+		<if test="loginId != null and loginId !=''">
+			AND u.login_id=#{loginId} 
+		</if>
 			
 			
+		<if test="name != null and name != ''">
+			AND u.name like 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%', #{name}, '%')</if>
+		</if>
+		
+		
+		
+		
+		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY  u.name
+			</otherwise>
+		</choose>
 			
 			
 		
 	</select>
 	
-	<insert id="insertUser" parameterType="sysUser">
-		insert into sys_user(login_id,EMAIL,PASSWORD,CREATE_TIME,STATUS)
-			values(#{loginId},#{email},#{password},#{createTime},#{status})
+		
+	<insert id="insert" parameterType="sysUser" useGeneratedKeys="true" keyProperty="id" >
+		insert into sys_user(LOGIN_ID,PHOTO,NAME,EMAIL,PASSWORD,CREATE_TIME,STATUS)
+			values(#{loginId},#{photo},#{name},#{email},#{password},#{createTime},#{status})
 	</insert>
+	
+	<!-- 更新用户 -->
+	<update id="update">
+		UPDATE sys_user SET 
+			login_id= #{loginId},
+			password = #{password}, 
+			name = #{name}, 
+			photo = #{photo},
+			email = #{email}
+			WHERE id = #{id}
+	</update>
+	
+	
+	
+	<!-- 插入用户和角色关联表数据 -->
+	<insert id="insertUserRole">
+		INSERT INTO sys_inter_user_role(role_id, user_id)
+		<foreach collection="userRoleList" item="role" separator=" union all ">
+			SELECT #{role.id},#{id}
+			<if test="dbName != 'mssql'">
+			FROM dual
+			</if>
+		</foreach>
+	</insert>
+	
+	<!-- 插入用户和部门关联表数据 -->
+	<insert id="insertUserOffice">
+		INSERT INTO sys_inter_user_office(office_id, user_id)
+		<foreach collection="userOfficeList" item="office" separator=" union all ">
+			SELECT #{office.id},#{id}
+			<if test="dbName != 'mssql'">
+			FROM dual
+			</if>
+		</foreach>
+	</insert>
+	
+	<!-- 删除用户和角色关联表数据 -->
+	<delete id="deleteUserRole">
+		DELETE FROM sys_inter_user_role WHERE user_id = #{id}
+	</delete>
+	
+	<!-- 删除用户所属角色，唯一对应-->
+	<delete id="removeUserInRole">
+		DELETE FROM sys_inter_user_role WHERE user_id = #{userId} and role_id = #{roleId}
+	</delete>
+	
+	
+	
+	<!-- 删除用户和部门关联表数据 -->
+	<delete id="deleteUserOffice">
+		DELETE FROM sys_inter_user_office WHERE user_id = #{id}
+	</delete>
+	
+	<!-- 逻辑删除用户 -->
+	<update id="delete">
+		UPDATE sys_user SET 
+			status = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 更新用户信息  -->
+	<update id="updateUserInfo">
+		UPDATE sys_user SET 
+			email = #{email},
+			photo = #{photo}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 更新用户密码 -->
+	<update id="updatePasswordById">
+		UPDATE sys_user SET 
+			password = #{password} 
+		WHERE id = #{id}
+	</update>
 	
 	
 

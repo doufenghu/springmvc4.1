@@ -37,7 +37,7 @@ else {
 </head>
 <body>
 	<div class="container-fluid">
-		<div class="page-header"><h1>系统内部错误.</h1></div>
+		<div class="page-header"><h1>500-系统内部错误.</h1></div>
 		<div class="errorMessage">
 			错误信息：<%=ex==null?"未知错误.":StringUtils.toHtml(ex.getMessage())%> <br/> <br/>
 			请点击“查看详细信息”按钮，将详细错误信息发送给系统管理员，谢谢！<br/> <br/>

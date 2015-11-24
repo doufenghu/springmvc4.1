@@ -21,6 +21,24 @@
         <listener-class>org.springframework.web.context.request.RequestContextListener</listener-class>  
   </listener>
   
+  <filter>
+    <filter-name>characterEncodingFilter</filter-name>
+    <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+    <init-param>
+      <param-name>encoding</param-name>
+      <param-value>UTF-8</param-value>
+    </init-param>
+    <init-param>
+      <param-name>forceEncoding</param-name>
+      <param-value>true</param-value>
+    </init-param>
+  </filter>
+  <filter-mapping>
+    <filter-name>characterEncodingFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+  
+  
   <!-- Apache Shiro -->
   <!-- The filter-name matches name of a 'shiroFilter' bean inside applicationContext-shiro.xml -->
   <filter>
@@ -68,22 +86,7 @@
     <url-pattern>/</url-pattern>
   </servlet-mapping>
   
-  <filter>
-    <filter-name>characterEncodingFilter</filter-name>
-    <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
-    <init-param>
-      <param-name>encoding</param-name>
-      <param-value>UTF-8</param-value>
-    </init-param>
-    <init-param>
-      <param-name>forceEncoding</param-name>
-      <param-value>true</param-value>
-    </init-param>
-  </filter>
-  <filter-mapping>
-    <filter-name>characterEncodingFilter</filter-name>
-    <url-pattern>/*</url-pattern>
-  </filter-mapping>
+  
   
    <!-- 以Listener方式启动LOG4j -->
 	<listener>
@@ -104,16 +107,55 @@
   
   
   <!-- 让web应用程序启动那个时自动添加属性文件 -->
-	<context-param>
+	<!-- <context-param>
 		<param-name>log4jConfigLocation</param-name>
 		<param-value>classpath:log4j.properties</param-value>
-	</context-param>
-	<context-param>
-		<!-- 日志页面的刷新间隔 -->
+	</context-param> -->
+	<!-- <context-param>
+		日志页面的刷新间隔
 		<param-name>log4jRefreshInterval</param-name>
-		<param-value>6000</param-value>
+		<param-value>60000</param-value>
 	</context-param>
+	 -->
 	
+	<!-- CKFinder -->
+	<servlet>
+		<servlet-name>CKFinderConnectorServlet</servlet-name>
+		<servlet-class>com.nis.web.controller.CKFinderConnectorServlet</servlet-class>
+		<init-param>
+			<param-name>XMLConfig</param-name>
+			<param-value>/WEB-INF/ckfinder.xml</param-value>
+		</init-param>
+		<init-param>
+			<param-name>debug</param-name>
+			<param-value>false</param-value>
+		</init-param>
+		<init-param>
+			<param-name>configuration</param-name>
+			<param-value>com.nis.web.controller.CKFinderConfig</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>CKFinderConnectorServlet</servlet-name>
+		<url-pattern>/static/ckfinder/core/connector/java/connector.java</url-pattern>
+	</servlet-mapping>
+	<filter>
+		<filter-name>FileUploadFilter</filter-name>
+		<filter-class>com.ckfinder.connector.FileUploadFilter</filter-class>
+		<init-param>
+			<param-name>sessionCookieName</param-name>
+			<param-value>JSESSIONID</param-value>
+		</init-param>
+		<init-param>
+			<param-name>sessionParameterName</param-name>
+			<param-value>jsessionid</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>FileUploadFilter</filter-name>
+		<url-pattern>/static/ckfinder/core/connector/java/connector.java</url-pattern>
+	</filter-mapping>
   
   
   <servlet-mapping>
@@ -146,5 +188,6 @@
 	 <error-code>404</error-code>
 	 <location>/WEB-INF/views/error/404.jsp</location>
   </error-page>
+  
   
 </web-app>

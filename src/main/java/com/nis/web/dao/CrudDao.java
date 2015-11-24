@@ -15,7 +15,7 @@ public interface CrudDao<T> {
 	 * @param id
 	 * @return
 	 */
-	public T get(String id);
+	public T get(Long id);
 	
 	/**
 	 * 获取单条数据

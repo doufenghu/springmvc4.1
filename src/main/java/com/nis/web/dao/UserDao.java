@@ -1,12 +1,14 @@
 package com.nis.web.dao;
 
 
+
+import java.util.List;
+
 import org.apache.ibatis.annotations.Param;
-import org.springframework.stereotype.Repository;
 
 import com.nis.domain.SysUser;
 
-@Repository
+@MyBatisDao
 public interface UserDao extends CrudDao<SysUser> {
 	
 	/**
@@ -23,11 +25,14 @@ public interface UserDao extends CrudDao<SysUser> {
 	 */
 	SysUser getUserByLoginName(@Param("loginName") String loginName);
 	
+	
+	
 	/**
-	 * 保存用户
-	 * @param user
+	 * 删除用户角色关联数据
+	 * @param user id
+	 * @return
 	 */
-	void insertUser(SysUser user);
+	public int deleteUserRole(Long id);
 	
 	
 	/**
@@ -35,7 +40,25 @@ public interface UserDao extends CrudDao<SysUser> {
 	 * @param user
 	 * @return
 	 */
-	SysUser getUserWithRelation(@Param("user") SysUser user);
+	SysUser getUserWithRelation(SysUser user);
+	
+	
+	
+	void insertUserRole(SysUser user);
+
+	public int deleteUserOffice(Long id);
+
+	void insertUserOffice(SysUser user);
+
+	List<SysUser> findUserByRoleId(Long id);
+
+	List<SysUser> findUserByOfficeId(Long id);
+
+	void removeUserInRole(@Param("userId") Long userId, @Param("roleId") Long roleId);
+
+	void updateUserInfo(SysUser user);
+
+	void updatePasswordById(SysUser user);
 	
 	
 }

@@ -4,19 +4,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.nis.domain.SysFunctionMenu;
+import com.nis.domain.SysMenu;
 
+/**
+ * 将树构建成上下层结构
+ * @author Administrator
+ *
+ */
 public final class TreeUtil {
 	
-	private List<SysFunctionMenu> menuList = new ArrayList<SysFunctionMenu>();
+	private List<SysMenu> menuList = new ArrayList<SysMenu>();
 	
-	public TreeUtil(List<SysFunctionMenu> menuList) {
+	public TreeUtil(List<SysMenu> menuList) {
 		this.menuList = menuList;
 	}
 	
-	public List<SysFunctionMenu> buildTree(){
-		List<SysFunctionMenu> newMenuList = new ArrayList<SysFunctionMenu>();
+	public List<SysMenu> buildTree(){
+		List<SysMenu> newMenuList = new ArrayList<SysMenu>();
 		
-		for (SysFunctionMenu menu : menuList) {
+		for (SysMenu menu : menuList) {
 			if (menu.getParent().getId().equals(1l)) {
 				build(menu);
 				newMenuList.add(menu);
@@ -26,14 +32,14 @@ public final class TreeUtil {
 		return newMenuList;
 	}
 	
-	private void build(SysFunctionMenu rootMenu) {
+	private void build(SysMenu rootMenu) {
 		
-		List<SysFunctionMenu> children = getChildren(rootMenu);
+		List<SysMenu> children = getChildren(rootMenu);
 		
 		if ( !StringUtil.isEmpty(children) ) {
 			rootMenu.setChildren(children);
-			for (SysFunctionMenu child : children) {
-				if (child.getIsLeaf() !=1) {
+			for (SysMenu child : children) {
+				if (StringUtils.isBlank(child.getHref())) { //根据url是否为空判断结束
 					build(child);
 				}
 			}
@@ -41,11 +47,11 @@ public final class TreeUtil {
 		
 	}
 	
-	private List<SysFunctionMenu> getChildren(SysFunctionMenu rootMenu){
+	private List<SysMenu> getChildren(SysMenu rootMenu){
 		
-		List<SysFunctionMenu> children = new ArrayList<SysFunctionMenu>();
+		List<SysMenu> children = new ArrayList<SysMenu>();
 		
-		for(SysFunctionMenu child : menuList) {
+		for(SysMenu child : menuList) {
 			if (rootMenu.getId().equals(child.getParent().getId())) {
 				children.add(child);
 			}

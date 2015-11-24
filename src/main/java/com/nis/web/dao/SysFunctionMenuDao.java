@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import com.nis.domain.SysFunctionButton;
 import com.nis.domain.SysFunctionMenu;
-@Repository
+@MyBatisDao
 public interface SysFunctionMenuDao {
     
 	/***

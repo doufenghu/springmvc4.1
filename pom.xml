@@ -28,11 +28,19 @@
   <version>0.0.1-SNAPSHOT</version>
   <!-- 仓库地址构建 -->
   <repositories>
+  	
+  	<!-- <repository>
+      <id>CN</id>
+      <name>OSChina Central</name>                                                                                                                       
+      <url>http://maven.oschina.net/content/groups/public/</url>
+    </repository>
+ -->  	
   	<repository>
   		<id>nexus</id>
   		<name>Team Nexus Repository</name>
-  		<url>http://192.168.11.198:8044/content/groups/public</url>
+  		<url>http://192.168.11.197:8044/content/groups/public</url>
   	</repository>
+  	
   </repositories>
 
   <build>
@@ -155,6 +163,8 @@
   	<activiti.version>5.17.0</activiti.version>
   	<jackson.version>2.5.4</jackson.version>
   	<sitemesh.version>3.0.1</sitemesh.version>
+  	<xstream.version>1.4.7</xstream.version>
+  	<poi.version>3.9</poi.version>
   </properties>
   
 
@@ -259,6 +269,13 @@
 		<groupId>com.github.penggle</groupId>
 		<artifactId>kaptcha</artifactId>
 		<version>2.3.2</version>
+	</dependency>
+	
+	<!-- xstream xml -->
+	<dependency>
+		<groupId>com.thoughtworks.xstream</groupId>
+		<artifactId>xstream</artifactId>
+		<version>${xstream.version}</version>
 	</dependency>
 	
 		<!-- image util -->
@@ -420,8 +437,51 @@
 		<version>${jackson.version}</version>
 	</dependency>
 	
+	<!-- poi office -->
+	<dependency>
+		<groupId>org.apache.poi</groupId>
+		<artifactId>poi</artifactId>
+		<version>${poi.version}</version>
+	</dependency>
+	<dependency>
+		<groupId>org.apache.poi</groupId>
+		<artifactId>poi-ooxml</artifactId>
+		<version>${poi.version}</version>
+	</dependency>
+	<dependency>
+		<groupId>org.apache.poi</groupId>
+		<artifactId>poi-ooxml-schemas</artifactId>
+		<version>${poi.version}</version>
+	</dependency>
 	
 	
+	<!-- CKFinder begin -->
+		<dependency>
+			<groupId>net.coobird</groupId>
+			<artifactId>thumbnailator</artifactId>
+			<version>0.4.2</version>
+		</dependency>
+		<dependency>
+			<groupId>com.ckfinder</groupId>
+			<artifactId>apache-ant-zip</artifactId>
+			<version>2.3</version>
+		</dependency>
+		<dependency>
+			<groupId>com.ckfinder</groupId>
+			<artifactId>ckfinder</artifactId>
+			<version>2.3</version>
+		</dependency>
+		<dependency>
+			<groupId>com.ckfinder</groupId>
+			<artifactId>ckfinderplugin-fileeditor</artifactId>
+			<version>2.3</version>
+		</dependency>
+		<dependency>
+			<groupId>com.ckfinder</groupId>
+			<artifactId>ckfinderplugin-imageresize</artifactId>
+			<version>2.3</version>
+		</dependency>
+		<!-- CKFinder end -->
 	
 	
 	<dependency>

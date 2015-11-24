@@ -1,17 +1,13 @@
 package com.nis.web.dao;
 
 import com.nis.domain.SysRole;
+@MyBatisDao
+public interface SysRoleDao extends CrudDao<SysRole>{
 
-public interface SysRoleDao {
-    int deleteByPrimaryKey(Long id);
+	SysRole getByName(SysRole r);
 
-    int insert(SysRole record);
+	void insertRoleMenu(SysRole role);
 
-    int insertSelective(SysRole record);
-
-    SysRole selectByPrimaryKey(Long id);
-
-    int updateByPrimaryKeySelective(SysRole record);
-
-    int updateByPrimaryKey(SysRole record);
+	void deleteRoleMenu(SysRole role);
+   
 }

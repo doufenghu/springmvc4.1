@@ -168,7 +168,55 @@
     <name>getDictList</name>
     <function-class>com.nis.util.DictUtils</function-class>
     <function-signature>java.util.List getDictList(java.lang.String)</function-signature>
-    <example>${fns:getDictList(type)}</example>  
+    <example>${fns:getDictList(key)}</example>  
+  </function>
+  
+  <function>
+    <description>获取字典标签</description>
+    <name>getDictLabel</name>
+    <function-class>com.nis.util.DictUtils</function-class>
+    <function-signature>java.lang.String getDictLabel(java.lang.String, java.lang.String, java.lang.String)</function-signature>
+    <example>${fns:getDictLabel(dictKey, itemCode, defaultValue)}</example>  
+  </function>
+  
+    <function>
+    <description>获取字典标签</description>
+    <name>getDictLabelDefault</name>
+    <function-class>com.nis.util.DictUtils</function-class>
+    <function-signature>java.lang.String getDictLabel(java.lang.String, java.lang.String)</function-signature>
+    <example>${fns:getDictLabel(dictKey, itemCode)}</example>  
+  </function>
+  
+   <function>
+    <description>获取字典标签(多个)</description>
+    <name>getDictLabels</name>
+    <function-class>com.nis.util.DictUtils</function-class>
+    <function-signature>java.lang.String getDictLabels(java.lang.String, java.lang.String, java.lang.String)</function-signature>
+    <example>${fns:getDictLabels(dictKey, itemCodes, defaultValue)}</example>  
+  </function>
+  
+  <function>
+    <description>获取字典值</description>
+    <name>getDictCode</name>
+    <function-class>com.nis.util.DictUtils</function-class>
+    <function-signature>java.lang.String getDictCode(java.lang.String, java.lang.String, java.lang.String)</function-signature>
+    <example>${fns:getDictCode(dictKey, itemValue, defaultValue)}</example>  
+  </function>
+  
+  <function>
+    <description>获取字典值</description>
+    <name>getDictCodeDefault</name>
+    <function-class>com.nis.util.DictUtils</function-class>
+    <function-signature>java.lang.String getDictCode(java.lang.String, java.lang.String)</function-signature>
+    <example>${fns:getDictCode(dictKey, itemValue)}</example>  
+  </function>
+  
+  <function>
+    <description>获取字典对象列表</description>
+    <name>getDictListJson</name>
+    <function-class>com.nis.util.DictUtils</function-class>
+    <function-signature>java.lang.String getDictListJson(java.lang.String)</function-signature>
+    <example>${fns:getDictListJson(dictKey)}</example>  
   </function>
   
   
